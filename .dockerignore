@@ -1,0 +1,7 @@
+# ignore binaries and vendor
+*.exe
+*.dll
+*.so
+*.dylib
+vendor
+.git
