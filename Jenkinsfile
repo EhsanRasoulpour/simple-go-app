@@ -64,13 +64,13 @@ pipeline{
                     reuseNode true
                 }
             }
-
-            environment {
-                HOME = "/tmp"
-            }
             steps {
                 script {
-                    sh "docker build -t my-simple-app ."
+                    sh '''
+                        export HOME=/tmp
+                        kdir -p $HOME/.docker
+                        docker build -t my-simple-app .
+                    '''
                 }
             }
         }
