@@ -16,8 +16,13 @@ pipeline{
                 }
             }
             steps {
-                sh 'go version || true'
-                sh 'go mod download'
+                sh '''
+                    go mod download
+                    go version || true
+                    export GOCACHE=$WORKSPACE/.cache
+                    mkdir -p $GOCACHE
+                    CGO_ENABLED=0 GOOS=linux go build -v -o app .
+                '''
             }
         }
 
