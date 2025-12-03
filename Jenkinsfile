@@ -64,6 +64,10 @@ pipeline{
                     reuseNode true
                 }
             }
+
+            environment {
+                HOME = "/tmp"
+            }
             steps {
                 script {
                     sh "docker build -t my-simple-app ."
