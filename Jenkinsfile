@@ -24,13 +24,6 @@ pipeline{
         }
 
         stage('Build') {
-            agent {
-                docker {
-                    image 'golang:1.20-alpine'
-                    args '-v /go/pkg/mod:/go/pkg/mod' // cache go modules
-                    reuseNode true
-                }
-            }
             steps {
                 sh '''
                     export GOCACHE=$WORKSPACE/.cache
@@ -38,6 +31,11 @@ pipeline{
                     CGO_ENABLED=0 GOOS=linux go build -v -o app .
                     ls -lh build/app || true
                 '''
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'go test ./... -v'
             }
         }
     }
