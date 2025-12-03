@@ -60,8 +60,7 @@ pipeline{
         stage('Docker Build') {
             agent {
                 docker {
-                    image 'golang:1.20-alpine'
-                    args '-v /go/pkg/mod:/go/pkg/mod' // cache go modules
+                    image 'rancher/dind:v1.10.3-rancher1'
                     reuseNode true
                 }
             }
