@@ -57,32 +57,23 @@ pipeline{
             }
         }
 
-        stage('Docker Build (use host docker socket)') {
-            agent {
-                docker {
-                    image 'docker:29.1.1-cli' // CLI only
-                    args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.docker:/root/.docker'
-                    reuseNode true
-                }
-            }
+        stage('Start DinD & build') {
             steps {
-                script {
-                    sh '''
-                    echo "whoami / id:"
-                    whoami
-                    id
-                    echo "socket perms:"
-                    ls -l /var/run/docker.sock || true
-                    stat -c "owner=%U group=%G mode=%a" /var/run/docker.sock || true
-                    echo "groups for current user:"
-                    groups || true
-
-                    docker version
-                    docker build --progress=plain -t my-simple-app:latest .
-                    '''
-                }
+                sh '''
+                # start dinD if not running
+                if [ -z "$(docker ps -q -f name=ci-dind)" ]; then
+                    docker run -d --name ci-dind --privileged -e DOCKER_TLS_CERTDIR="" docker:24-dind
+                    # wait for docker daemon to be ready
+                    for i in $(seq 1 20); do
+                    docker -H tcp://127.0.0.1:2375 info && break || sleep 1
+                    done
+                fi
+                # use CLI to build against DinD daemon
+                docker -H tcp://127.0.0.1:2375 build -t myuser/my-simple-app:${BUILD_NUMBER} .
+                '''
             }
-        }
+}
+
 
     }
 }
