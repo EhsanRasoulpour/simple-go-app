@@ -57,23 +57,19 @@ pipeline{
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Build (use host docker socket)') {
             agent {
                 docker {
-                    image 'docker:29.1.1-dind-alpine3.22'
-                    args '--privileged -v /var/lib/docker:/var/lib/docker'
+                    image 'docker:29.1.1-cli' // CLI only
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.docker:/root/.docker'
                     reuseNode true
                 }
-            }
-            environment {
-                DOCKER_HOST = "tcp://localhost:2629" // Docker daemon in DinD
             }
             steps {
                 script {
                     sh '''
-                        export HOME=/tmp
-                        mkdir -p $HOME/.docker
-                        docker build -t my-simple-app .
+                    docker version
+                    docker build --progress=plain -t my-simple-app:latest .
                     '''
                 }
             }
