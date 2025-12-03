@@ -19,9 +19,6 @@ pipeline{
                 sh '''
                     go mod download
                     go version || true
-                    export GOCACHE=$WORKSPACE/.cache
-                    mkdir -p $GOCACHE
-                    CGO_ENABLED=0 GOOS=linux go build -v -o app .
                 '''
             }
         }
@@ -35,8 +32,12 @@ pipeline{
                 }
             }
             steps {
-                sh 'CGO_ENABLED=0 GOOS=linux go build -v -o app .'
-                sh 'ls -lh build/app || true'
+                sh '''
+                    export GOCACHE=$WORKSPACE/.cache
+                    mkdir -p $GOCACHE
+                    CGO_ENABLED=0 GOOS=linux go build -v -o app .
+                    ls -lh build/app || true
+                '''
             }
         }
     }
