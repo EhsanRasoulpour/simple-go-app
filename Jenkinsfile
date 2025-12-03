@@ -66,7 +66,7 @@ pipeline{
             }
             steps {
                 script {
-                    sh "docker build -t mySimpleApp ."
+                    sh "docker build -t my-simple-app ."
                 }
             }
         }
