@@ -68,8 +68,8 @@ pipeline{
             steps {
                 script {
                     sh '''
-                        #export HOME=/tmp
-                        #mkdir -p $HOME/.docker
+                        export HOME=/tmp
+                        mkdir -p $HOME/.docker
                         docker build -t my-simple-app .
                     '''
                 }
