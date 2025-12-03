@@ -68,6 +68,15 @@ pipeline{
             steps {
                 script {
                     sh '''
+                    echo "whoami / id:"
+                    whoami
+                    id
+                    echo "socket perms:"
+                    ls -l /var/run/docker.sock || true
+                    stat -c "owner=%U group=%G mode=%a" /var/run/docker.sock || true
+                    echo "groups for current user:"
+                    groups || true
+
                     docker version
                     docker build --progress=plain -t my-simple-app:latest .
                     '''
