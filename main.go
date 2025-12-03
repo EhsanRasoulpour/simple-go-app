@@ -23,7 +23,7 @@ func main() {
 	http.HandleFunc("/", greetingHandler)
 	http.HandleFunc("/health", healthHandler)
 
-	port := getenv("PORT", "8080")
+	port := getenv("PORT", "9595")
 	addr := fmt.Sprintf(":%s", port)
 	log.Printf("starting server on %s\n", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
