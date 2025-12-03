@@ -1,0 +1,101 @@
+pipeline {
+  agent any
+
+  environment {
+    // configurable image name; override in job if you want
+    IMAGE_NAME = "simple-go-app"
+    // Docker registry (for Docker Hub use docker.io/<username>)
+    // For local registry use: localhost:5000
+    REGISTRY = "docker.io" // change if you push elsewhere, e.g., localhost:5000
+    // App port on host to expose; change if needed
+    APP_PORT = "8080"
+    // Container name prefix
+    CONTAINER_NAME = "simple-go-app"
+    // Use BUILD_NUMBER in tag
+    TAG = "${env.BUILD_NUMBER}"
+    // Full image reference
+    IMAGE = "${env.REGISTRY}/${env.IMAGE_NAME}:${env.TAG}"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Setup') {
+      steps {
+        sh 'go version || true'
+        sh 'go mod download'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh 'CGO_ENABLED=0 GOOS=linux go build -v -o app .'
+        sh 'ls -lh app || true'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh 'go test ./... -v'
+      }
+    }
+
+    stage('Docker Build') {
+      steps {
+        script {
+          // Build the docker image locally
+          sh "docker build -t ${IMAGE} ."
+        }
+      }
+    }
+
+    stage('Docker Login & Push') {
+      steps {
+        script {
+          // dockerhub-creds is a username/password credentials in Jenkins
+          withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            // If using docker.io with images like docker.io/<user>/<repo>, ensure IMAGE_NAME includes username/org.
+            // You might want to set IMAGE_NAME to "youruser/simple-go-app" in the job to push to Docker Hub.
+            sh '''
+              echo "$DOCKER_PASSWORD" | docker login ${REGISTRY} -u "$DOCKER_USERNAME" --password-stdin
+              docker push ${IMAGE}
+              docker logout ${REGISTRY}
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        script {
+          // stop old container(s)
+          sh '''
+            set -e
+            # Stop and remove existing container named ${CONTAINER_NAME}
+            if docker ps -q --filter "name=${CONTAINER_NAME}" | grep -q .; then
+              echo "Stopping existing container(s) with name ${CONTAINER_NAME}..."
+              docker ps -q --filter "name=${CONTAINER_NAME}" | xargs -r docker rm -f
+            fi
+            # Run new container
+            docker run -d --name ${CONTAINER_NAME} --env GREETING="Hello from Jenkins build ${BUILD_NUMBER}" -p ${APP_PORT}:8080 ${IMAGE}
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Pipeline ${env.BUILD_NUMBER} succeeded. App image: ${IMAGE} deployed on port ${APP_PORT}"
+    }
+    failure {
+      echo "Pipeline failed."
+    }
+  }
+}
