@@ -8,9 +8,11 @@ pipeline{
         }
 
         stage('setup') {
-            agent docker{
-                image 'golang:1.20'
-                // args '-v /go/pkg/mod:/go/pkg/mod'
+            agent {
+                docker {
+                    image 'golang:1.20-alpine'
+                    args '-v /go/pkg/mod:/go/pkg/mod' // cache go modules
+                }
             }
             steps {
                 sh 'go version || true'
