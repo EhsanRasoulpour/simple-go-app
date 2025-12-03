@@ -61,14 +61,15 @@ pipeline{
             agent {
                 docker {
                     image 'docker:29.1.1-dind-alpine3.22'
+                    args '--privileged -v /var/lib/docker:/var/lib/docker'
                     reuseNode true
                 }
             }
             steps {
                 script {
                     sh '''
-                        export HOME=/tmp
-                        mkdir -p $HOME/.docker
+                        #export HOME=/tmp
+                        #mkdir -p $HOME/.docker
                         docker build -t my-simple-app .
                     '''
                 }
