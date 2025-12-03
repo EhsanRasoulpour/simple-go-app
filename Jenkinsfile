@@ -60,7 +60,7 @@ pipeline{
         stage('Docker Build') {
             agent {
                 docker {
-                    image 'docker:dind'
+                    image 'docker:29.1.1-dind-alpine3.22'
                     reuseNode true
                 }
             }
