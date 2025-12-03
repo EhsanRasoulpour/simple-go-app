@@ -41,8 +41,19 @@ pipeline{
             }
         }
         stage('Test') {
+            agent {
+                docker {
+                    image 'golang:1.20-alpine'
+                    args '-v /go/pkg/mod:/go/pkg/mod' // cache go modules
+                    reuseNode true
+                }
+            }
             steps {
-                sh 'go test ./... -v'
+                sh '''
+                    export GOCACHE=$WORKSPACE/.cache
+                    mkdir -p $GOCACHE
+                    go test ./... -v
+                '''
             }
         }
     }
