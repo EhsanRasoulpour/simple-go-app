@@ -57,26 +57,24 @@ pipeline{
             }
         }
 
-        stage('Build Docker Image') {
-            agent {
-                docker {
-                    image 'docker:24-cli'
-                    args '--link dind:docker' // Link to dind service
-                }
-            }
-            steps {
-                sh '''
-                    export DOCKER_HOST=tcp://docker:2375
-                    docker build -t my-app:latest .
-                '''
-            }
-        }
+        // stage('Docker Build') {
+        //     agent {
+        //         docker {
+        //             image 'docker:29.1.1-dind-alpine3.22'
+        //             args '--privileged -v /var/lib/docker:/var/lib/docker'
+        //             reuseNode true
+        //         }
+        //     }
+        //     steps {
+        //         script {
+        //             sh '''
+        //                 export HOME=/tmp
+        //                 mkdir -p $HOME/.docker
+        //                 docker build -t my-simple-app .
+        //             '''
+        //         }
+        //     }
+        // }
 
-    }
-    services {
-        dind {
-            image 'docker:24-dind'
-            privileged true
-        }
     }
 }
