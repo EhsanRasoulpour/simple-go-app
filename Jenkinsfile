@@ -62,7 +62,7 @@ pipeline{
                 sh '''
                 # start dinD if not running
                 if [ -z "$(docker ps -q -f name=ci-dind)" ]; then
-                    docker run -d --name ci-dind --privileged -e DOCKER_TLS_CERTDIR="" docker:24-dind
+                    docker run -d --name ci-dind --privileged -e DOCKER_TLS_CERTDIR="" docker:24.0-dind
                     # wait for docker daemon to be ready
                     for i in $(seq 1 20); do
                     docker -H tcp://127.0.0.1:2375 info && break || sleep 1
