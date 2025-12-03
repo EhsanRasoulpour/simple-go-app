@@ -57,24 +57,26 @@ pipeline{
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             agent {
                 docker {
-                    image 'docker:29.1.1-dind-alpine3.22'
-                    args '--privileged -v /var/lib/docker:/var/lib/docker'
-                    reuseNode true
+                    image 'docker:24-cli'
+                    args '--link dind:docker' // Link to dind service
                 }
             }
             steps {
-                script {
-                    sh '''
-                        export HOME=/tmp
-                        mkdir -p $HOME/.docker
-                        docker build -t my-simple-app .
-                    '''
-                }
+                sh '''
+                    export DOCKER_HOST=tcp://docker:2375
+                    docker build -t my-app:latest .
+                '''
             }
         }
 
+    }
+    services {
+        dind {
+            image 'docker:24-dind'
+            privileged true
+        }
     }
 }
