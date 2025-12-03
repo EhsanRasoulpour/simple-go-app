@@ -66,7 +66,7 @@ pipeline{
                 }
             }
             environment {
-                DOCKER_HOST = "tcp://localhost:2375" // Docker daemon in DinD
+                DOCKER_HOST = "tcp://localhost:2629" // Docker daemon in DinD
             }
             steps {
                 script {
