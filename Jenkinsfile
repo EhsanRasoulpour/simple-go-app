@@ -58,6 +58,13 @@ pipeline{
         }
 
         stage('Docker Build') {
+            agent {
+                docker {
+                    image 'golang:1.20-alpine'
+                    args '-v /go/pkg/mod:/go/pkg/mod' // cache go modules
+                    reuseNode true
+                }
+            }
             steps {
                 script {
                     sh "docker build -t ${IMAGE} ."
