@@ -60,7 +60,7 @@ pipeline{
         stage('Docker Build') {
             agent {
                 docker {
-                    image 'rancher/dind:v1.10.3-rancher1'
+                    image 'jpetazzo/dind:latest'
                     reuseNode true
                 }
             }
